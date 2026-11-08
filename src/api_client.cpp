@@ -3,6 +3,7 @@
 
 #include "api_client.h"
 #include "config.h"
+#include "api_request.h"
 
 #include <regex>
 
@@ -224,7 +225,7 @@ static json sendOpenAIRaw(
     cli.set_read_timeout(120);
 
     json body = {
-        {"model", config.model},
+        {"model", configuredModel(config.model, DEFAULT_OPENAI_MODEL)},
         {"messages", toOpenAIMessages(messages, system)}
     };
 
@@ -236,7 +237,7 @@ static json sendOpenAIRaw(
         {"content-type", "application/json"}
     };
 
-    std::string path = pathPrefix + "/chat/completions";
+    std::string path = openAIPathPrefix(pathPrefix) + "/chat/completions";
     auto res = cli.Post(path, headers, body.dump(), "application/json");
 
     if (!res)
@@ -342,3 +343,4 @@ std::string extractTextContent(const json& assistantMsg)
     }
     return result;
 }
+

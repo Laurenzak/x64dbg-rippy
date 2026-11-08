@@ -251,6 +251,8 @@ static json sendOpenAIRaw(
                 errMsg += ": " + errBody["error"]["message"].get<std::string>();
         }
         catch (...) {}
+        errMsg += " [request path=" + path + ", model=" + body["model"].dump() + "]";
+		errMsg += "\nRespuesta completa del servidor: " + res->body;
         throw std::runtime_error(errMsg);
     }
 

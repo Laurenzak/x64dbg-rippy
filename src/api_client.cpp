@@ -69,7 +69,6 @@ static json sendAnthropicRaw(
     httplib::Headers headers = {
         {"x-api-key", config.apiKey},
         {"anthropic-version", ANTHROPIC_API_VERSION},
-        {"content-type", "application/json"}
     };
 
     std::string path = pathPrefix + "/v1/messages";
@@ -234,7 +233,6 @@ static json sendOpenAIRaw(
 
     httplib::Headers headers = {
         {"Authorization", "Bearer " + config.apiKey},
-        {"content-type", "application/json"}
     };
 
     std::string path = openAIPathPrefix(pathPrefix) + "/chat/completions";
@@ -343,4 +341,6 @@ std::string extractTextContent(const json& assistantMsg)
     }
     return result;
 }
+
+
 

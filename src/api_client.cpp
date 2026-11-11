@@ -4,6 +4,7 @@
 #include "api_client.h"
 #include "config.h"
 #include "api_request.h"
+#include "api_response.h"
 
 #include <regex>
 
@@ -251,43 +252,12 @@ static json sendOpenAIRaw(
                 errMsg += ": " + errBody["error"]["message"].get<std::string>();
         }
         catch (...) {}
-        errMsg += " [request path=" + path + ", model=" + body["model"].dump() + "]";
+		errMsg += " [request path=" + path + ", model=" + body["model"].dump() + "]";
 		errMsg += "\nRespuesta completa del servidor: " + res->body;
         throw std::runtime_error(errMsg);
     }
 
     return json::parse(res->body);
-}
-
-static json normalizeOpenAIResponse(const json& raw)
-{
-    // OpenAI response: {"choices": [{"message": {"role": "assistant", "content": "...", "tool_calls": [...]}}]}
-    const auto& message = raw["choices"][0]["message"];
-    json content = json::array();
-
-    if (message.contains("content") && !message["content"].is_null())
-    {
-        content.push_back({{"type", "text"}, {"text", message["content"]}});
-    }
-
-    if (message.contains("tool_calls"))
-    {
-        for (const auto& tc : message["tool_calls"])
-        {
-            json input;
-            try { input = json::parse(tc["function"]["arguments"].get<std::string>()); }
-            catch (...) { input = json::object(); }
-
-            content.push_back({
-                {"type", "tool_use"},
-                {"id", tc["id"]},
-                {"name", tc["function"]["name"]},
-                {"input", input}
-            });
-        }
-    }
-
-    return {{"role", "assistant"}, {"content", content}};
 }
 
 // --- Public API ---
